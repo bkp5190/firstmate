@@ -20,7 +20,7 @@ A crewmate that took a real before/after screenshot as task evidence must upload
 bin/fm-pr-screenshot-upload.sh <owner/repo> <local-file-path> [<local-file-path> ...]
 ```
 
-Prints one `![filename](url)` markdown line per file to stdout, in argument order.
+Prints one markdown image line per file to stdout, in the form `![filename]` immediately followed by `(url)`, in argument order.
 Capture that output straight into a PR body, `gh pr comment`, or a `done:` line.
 On a mixed batch, a failed file reports its error on stderr and a nonzero exit while every file that did succeed still prints its markdown line, so partial output is still usable.
 The script's own header is the authoritative source for its exact flags and error behavior.
@@ -40,7 +40,7 @@ curl -sS -X POST \
 
 This returns `{"url": "https://github.com/user-attachments/assets/<uuid>"}`.
 Get `<numeric-repo-id>` with `gh api repos/<owner>/<repo> --jq '.id'`.
-Embed the returned URL as `![alt text](url)`; GitHub renders it inline wherever it renders markdown (PR body, PR comment, issue comment).
+Embed the returned URL as `![alt text]` immediately followed by `(url)`; GitHub renders it inline wherever it renders markdown (PR body, PR comment, issue comment).
 
 ## Caveats
 

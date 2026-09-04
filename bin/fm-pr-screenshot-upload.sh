@@ -120,7 +120,8 @@ for path in "$@"; do
     RC=1
     continue
   fi
-  printf '![%s](%s)\n' "$name" "$url"
+  name_md=$(printf '%s' "$name" | sed 's/\]/\\]/g')
+  printf '![%s](%s)\n' "$name_md" "$url"
 done
 
 exit "$RC"
