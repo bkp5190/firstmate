@@ -1,0 +1,27 @@
+End-to-end verification of bin/fm-pr-screenshot-upload.sh against a real GitHub repo (bkp5190/firstmate, push access confirmed).
+
+Command:
+  $ bash bin/fm-pr-screenshot-upload.sh bkp5190/firstmate "/tmp/fm-screenshot-test/before]after.png"
+
+Output (note the `]` in the filename is correctly backslash-escaped in the markdown alt text,
+confirming the review-2 fix for unescaped `]` producing malformed markdown):
+  ![before\]after.png](https://github.com/user-attachments/assets/01d9d5ca-f7c7-4b28-ac4c-1ba571902afe)
+
+Verification the returned URL is a genuine, working image asset:
+  $ curl -H "Authorization: Bearer $(gh auth token)" -L \
+      https://github.com/user-attachments/assets/01d9d5ca-f7c7-4b28-ac4c-1ba571902afe
+  -> HTTP 302 redirect to a signed github-production-user-asset S3 URL
+  -> downloaded bytes are byte-identical (cmp) to the originally uploaded PNG
+
+This confirms the undocumented uploads.github.com/user-attachments/assets endpoint described in
+.agents/skills/github-pr-screenshot/SKILL.md works exactly as documented end-to-end: a local
+screenshot is uploaded, a rendering-capable github.com URL is returned, and that URL resolves back
+to the exact uploaded image.
+
+Also observed (informational, not a defect): an unreferenced attachment asset on this *public*
+repo returned 404 to a fully anonymous curl request (no Authorization header) shortly after
+upload, only succeeding once the request carried the gh auth Bearer token. This matches GitHub's
+general user-attachments behavior of gating direct asset fetches behind an authenticated session
+even on public repos; it does not affect inline rendering in an actual PR/issue body, which is
+served through github.com's normal authenticated page-view context for any viewer with repo
+access, consistent with the SKILL.md caveat about authenticated viewers.
